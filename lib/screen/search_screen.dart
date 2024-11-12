@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:recipe/controller/api_service.dart';
+import 'package:speech_to_text/speech_to_text_provider.dart';
 import '../model/meal.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -11,39 +12,75 @@ class SearchScreen extends StatefulWidget {
 }
 
 class SearchScreenState extends State<SearchScreen> {
+  ApiService apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
   late Future<List<Meal>> _mealsFuture;
 
   @override
   void initState() {
     super.initState();
-    _mealsFuture = fetchMeals(''); // Initial load with no query
+    _mealsFuture = apiService.fetchMeals(''); // Initial load with no query
   }
 
-  void _searchMeals() {
+  void _searchMeals(String? query) {
     setState(() {
-      _mealsFuture = fetchMeals(_searchController.text);
+      _mealsFuture = apiService.fetchMeals(_searchController.text);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    var speechProvider = Provider.of<SpeechToTextProvider>(context);
+    String hintText = speechProvider.lastResult?.recognizedWords??'Search for a meal...';
     return Scaffold(
-      appBar: AppBar(title: const Text('Search Meals')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+          title: const Text('Search Meals'),
+      ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              autofocus: false,
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search for a meal...',
-                prefixIcon: const Icon(Icons.search),
+                hintText: hintText,
+                prefixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () => _searchMeals(speechProvider.lastResult?.recognizedWords??''),
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
+                suffixIcon: SizedBox(
+                  width: 100,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                        },
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          if(speechProvider.isAvailable){
+                            speechProvider.listen(partialResults: true, localeId: "en_GB");
+                          }else if(speechProvider.isListening){
+                            speechProvider.stop();
+                          }else{
+                            null;
+                          }
+                        },
+                        icon: speechProvider.isListening?const Icon(Icons.mic_off_outlined): const Icon(Icons.mic,),
+                      ),
+                    ],
+                  ),
+                )
               ),
-              onSubmitted: (_) => _searchMeals(),
+              onSubmitted: (_) => _searchMeals(speechProvider.lastResult?.recognizedWords),
             ),
           ),
           Expanded(
@@ -52,14 +89,12 @@ class SearchScreenState extends State<SearchScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
+                } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
                   if(_searchController.text.isNotEmpty){
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return const Center(child: Text('No meals found.'));
                   }else{
                     return const Center(child: Text('Search for a meal...'));
                   }
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No meals found.'));
                 } else {
                   final meals = snapshot.data!;
                   return ListView.builder(
@@ -70,6 +105,9 @@ class SearchScreenState extends State<SearchScreen> {
                         leading: Image.network(meal.strMealThumb ?? ''),
                         title: Text(meal.strMeal),
                         subtitle: Text(meal.strCategory ?? ''),
+                        onTap: () {
+                          Navigator.pushNamed(context, '/recipe', arguments: meal);
+                        },
                       );
                     },
                   );
@@ -80,18 +118,5 @@ class SearchScreenState extends State<SearchScreen> {
         ],
       ),
     );
-  }
-
-  Future<List<Meal>> fetchMeals(String query) async {
-    final url = Uri.parse('https://www.themealdb.com/api/json/v1/1/search.php?s=$query'); // replace with actual endpoint
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      List meals = jsonData['meals'];
-      return meals.map((meal) => Meal.fromJson(meal)).toList();
-    } else {
-      throw Exception('Failed to load meals');
-    }
   }
 }
