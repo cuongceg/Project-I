@@ -4,6 +4,7 @@ class Meal {
   final String? strCategory;
   final String? strArea;
   final String? strInstructions;
+  final String? strYoutube;
   final String? strMealThumb;
   final List<String> ingredients;
   final List<String> measures;
@@ -14,6 +15,7 @@ class Meal {
     this.strCategory,
     this.strArea,
     this.strInstructions,
+    this.strYoutube,
     this.strMealThumb,
     required this.ingredients,
     required this.measures,
@@ -39,6 +41,7 @@ class Meal {
       strArea: json['strArea'],
       strInstructions: json['strInstructions'],
       strMealThumb: json['strMealThumb'],
+      strYoutube: json['strYoutube'],
       ingredients: ingredients,
       measures: measures,
     );
