@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recipe/controller/api_service.dart';
+import 'package:recipe/screen/recipe_screen.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
 import '../model/meal.dart';
 
@@ -22,7 +23,7 @@ class SearchScreenState extends State<SearchScreen> {
     _mealsFuture = apiService.fetchMeals(''); // Initial load with no query
   }
 
-  void _searchMeals(String? query) {
+  void _searchMeals() {
     setState(() {
       _mealsFuture = apiService.fetchMeals(_searchController.text);
     });
@@ -31,12 +32,12 @@ class SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     var speechProvider = Provider.of<SpeechToTextProvider>(context);
-    String hintText = speechProvider.lastResult?.recognizedWords??'Search for a meal...';
+    final mealProvider = Provider.of<MealProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-          title: const Text('Search Meals'),
+        title: const Text('Search Meals'),
       ),
       body: Column(
         children: [
@@ -46,10 +47,17 @@ class SearchScreenState extends State<SearchScreen> {
               autofocus: false,
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: hintText,
+                hintText: 'Search for a meal...',
                 prefixIcon: IconButton(
                   icon: const Icon(Icons.search),
-                  onPressed: () => _searchMeals(speechProvider.lastResult?.recognizedWords??''),
+                  onPressed: () => {
+                    if(speechProvider.lastResult?.recognizedWords != null && _searchController.text.isEmpty){
+                      setState(() {
+                        _searchController.text = speechProvider.lastResult!.recognizedWords;
+                      })
+                    },
+                    _searchMeals()
+                  }
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
@@ -80,7 +88,7 @@ class SearchScreenState extends State<SearchScreen> {
                   ),
                 )
               ),
-              onSubmitted: (_) => _searchMeals(speechProvider.lastResult?.recognizedWords),
+              onSubmitted: (_) => _searchMeals(),
             ),
           ),
           Expanded(
@@ -96,18 +104,45 @@ class SearchScreenState extends State<SearchScreen> {
                     return const Center(child: Text('Search for a meal...'));
                   }
                 } else {
-                  final meals = snapshot.data!;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    mealProvider.setMeals(snapshot.data!);
+                  });
                   return ListView.builder(
-                    itemCount: meals.length,
+                    itemCount: mealProvider.meals.length,
                     itemBuilder: (context, index) {
-                      final meal = meals[index];
+                      final meal = mealProvider.meals[index];
                       return ListTile(
                         leading: Image.network(meal.strMealThumb ?? ''),
                         title: Text(meal.strMeal),
                         subtitle: Text(meal.strCategory ?? ''),
                         onTap: () {
-                          Navigator.pushNamed(context, '/recipe', arguments: meal);
-                        },
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>RecipeScreen(meal: meal)));},
+                        trailing: GestureDetector(
+                          onTap: () {
+                            mealProvider.toggleFavourite(meal.idMeal);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(meal.isFavourite ? 'Add to favourite recipes' : 'Remove from favourite recipes'),
+                                duration: const Duration(milliseconds: 400),
+                              ),
+                            );
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            height: 40,
+                            width: 40,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: Center(
+                              child: Icon(
+                                meal.isFavourite ? Icons.favorite : Icons.favorite_outline,
+                                color: meal.isFavourite ? Colors.redAccent : Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
                       );
                     },
                   );
