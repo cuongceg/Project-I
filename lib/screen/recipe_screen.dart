@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:recipe/const_value.dart';
-
 import '../controller/api_service.dart';
 import '../model/meal.dart';
 
@@ -54,6 +54,57 @@ class _RecipeScreenState extends State<RecipeScreen> {
               ),
             ),
           ),
+          Positioned(
+            left: 15,
+            top: 40,
+            child:GestureDetector(
+              onTap: (){
+                Navigator.pop(context);
+              },
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white
+                ),
+                child: const Center(
+                  child: Icon(Icons.arrow_back_rounded,color: Colors.black,),
+                ),
+              ),
+            ),
+          ),
+          Consumer<MealProvider>(
+              builder: (context,mealProvider,child){
+                bool isFavourite = widget.meal.isFavourite;
+                return Positioned(
+                  right: 15,
+                  top: 40,
+                  child:GestureDetector(
+                    onTap: (){
+                      mealProvider.toggleFavourite(widget.meal.idMeal);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(!isFavourite?'Add to favourite recipes':"Remove to favourite recipes"),
+                          duration: const Duration(milliseconds: 400),
+                        ),
+                      );
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 40,
+                      width: 40,
+                      decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white
+                      ),
+                      child: Center(
+                        child: Icon(isFavourite ?Icons.favorite:Icons.favorite_outline,color: isFavourite ?Colors.redAccent:Colors.black,),
+                      ),
+                    ),
+                  ),
+                );
+              }),
           DraggableScrollableSheet(
               key: _sheet,
               initialChildSize: 0.6,
@@ -155,7 +206,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                           height: 40,
                           width: 150,
                           decoration: BoxDecoration(
-                            color: Colors.blue,
+                            color: const Color(0xFF329932),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
