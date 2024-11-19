@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:recipe/screen/favourite_screen.dart';
-import 'package:recipe/screen/recipe_screen.dart';
 import 'package:recipe/screen/search_screen.dart';
 
-import '../model/meal.dart';
 
 
 class MainScreen extends StatefulWidget {
