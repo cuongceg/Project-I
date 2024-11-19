@@ -29,6 +29,12 @@ class SearchScreenState extends State<SearchScreen> {
     });
   }
 
+  void _searchMealsByVoice(String query) {
+    setState(() {
+      _mealsFuture = apiService.fetchMeals(query);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var speechProvider = Provider.of<SpeechToTextProvider>(context);
@@ -48,17 +54,7 @@ class SearchScreenState extends State<SearchScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search for a meal...',
-                prefixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () => {
-                    if(speechProvider.lastResult?.recognizedWords != null && _searchController.text.isEmpty){
-                      setState(() {
-                        _searchController.text = speechProvider.lastResult!.recognizedWords;
-                      })
-                    },
-                    _searchMeals()
-                  }
-                ),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
@@ -74,16 +70,63 @@ class SearchScreenState extends State<SearchScreen> {
                       ),
                       IconButton(
                         onPressed: () {
-                          if(speechProvider.isAvailable){
-                            speechProvider.listen(partialResults: true, localeId: "en_GB");
-                          }else if(speechProvider.isListening){
-                            speechProvider.stop();
-                          }else{
-                            null;
-                          }
-                        },
-                        icon: speechProvider.isListening?const Icon(Icons.mic_off_outlined): const Icon(Icons.mic,),
+                          showDialog(
+                              context: context,
+                              builder: (context){
+                                return AlertDialog(
+                                    title: const Text('Speech to Text'),
+                                    content: Consumer<SpeechToTextProvider>(
+                                      builder: (context, speechProvider, child) {
+                                        return Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (speechProvider.isListening)
+                                              const Text('Listening...')
+                                            else
+                                              const Text('Not listening'),
+                                            const SizedBox(height: 20),
+                                            if (speechProvider.lastResult != null)
+                                              Text('Recognized Words: ${speechProvider.lastResult!.recognizedWords}')
+                                            else
+                                              const Text('No words recognized yet.'),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  actions: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        IconButton(
+                                          onPressed: (){
+                                            if(speechProvider.isAvailable){
+                                              speechProvider.listen(partialResults: true, localeId: "en_GB");
+                                            }else if(speechProvider.isListening){
+                                              speechProvider.stop();
+                                            }else{
+                                              null;
+                                            }
+                                          },
+                                          icon: const Icon(Icons.mic_outlined),
+                                        ),
+                                        IconButton(
+                                            onPressed: (){
+                                              if(speechProvider.lastResult?.recognizedWords != null){
+                                                _searchMealsByVoice(speechProvider.lastResult!.recognizedWords);
+                                                Navigator.pop(context);
+                                              }
+                                            },
+                                            icon: const  Icon(Icons.search_rounded))
+                                      ],
+                                    )
+                                  ],
+                                );
+                              }
+                          );
+                          },
+                        icon: const Icon(Icons.mic),
                       ),
+
                     ],
                   ),
                 )
@@ -98,11 +141,7 @@ class SearchScreenState extends State<SearchScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-                  if(_searchController.text.isNotEmpty){
                     return const Center(child: Text('No meals found.'));
-                  }else{
-                    return const Center(child: Text('Search for a meal...'));
-                  }
                 } else {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     mealProvider.setMeals(snapshot.data!);
