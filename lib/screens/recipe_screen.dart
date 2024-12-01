@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:recipe/const_value.dart';
+import 'package:recipe/core/colors.dart';
+import 'package:recipe/core/fonts.dart';
+import 'package:recipe/model/comment.dart';
+import 'package:recipe/providers/comments_provider.dart';
+import 'package:recipe/screens/widgets/base_component.dart';
 import '../services/api_service.dart';
 import '../model/meal.dart';
 import 'package:recipe/providers/meal_provider.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class RecipeScreen extends StatefulWidget {
   final Meal meal;
@@ -28,6 +33,10 @@ class _RecipeScreenState extends State<RecipeScreen> {
         _isButtonVisible.value = true;
       }
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final commentsProvider = Provider.of<CommentProvider>(context, listen: false);
+      commentsProvider.mealId = widget.meal.idMeal;
+    });
   }
 
   @override
@@ -39,6 +48,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final commentsProvider = Provider.of<CommentProvider>(context);
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -57,7 +67,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
           ),
           Positioned(
             left: 15,
-            top: 40,
+            top: 50,
             child:GestureDetector(
               onTap: (){
                 Navigator.pop(context);
@@ -80,7 +90,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                 bool isFavourite = widget.meal.isFavourite;
                 return Positioned(
                   right: 15,
-                  top: 40,
+                  top: 50,
                   child:GestureDetector(
                     onTap: (){
                       mealProvider.toggleFavourite(widget.meal.idMeal);
@@ -145,21 +155,15 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
                       SliverList.list(
                           children:[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 15.0,top: 8.0,bottom: 8.0),
-                                  child: Text(
-                                    widget.meal.strMeal ,
-                                    style: ConstFonts().headingStyle,
-                                    softWrap: true,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                  ),
-                                ),
-
-                              ],
+                            Padding(
+                              padding: const EdgeInsets.only(left: 15.0,top: 8.0,bottom: 8.0),
+                              child: Text(
+                                widget.meal.strMeal ,
+                                style: ConstFonts().headingStyle,
+                                softWrap: true,
+                                overflow: TextOverflow.clip,
+                                maxLines: 3,
+                              ),
                             ),
                             headerLine("Ingredients:",ConstFonts().titleStyle),
                             for(int i = 0; i<widget.meal.ingredients.length;i++)
@@ -179,6 +183,41 @@ class _RecipeScreenState extends State<RecipeScreen> {
                                   widget.meal.strInstructions ?? '',
                                   style: ConstFonts().bodyStyle
                               ),
+                            ),
+                            const Divider(
+                              color: Colors.grey,
+                              thickness: 1,
+                            ),
+                            headerLine("Comments:",ConstFonts().titleStyle),
+                            StreamBuilder<List<Comment>>(
+                                stream: commentsProvider.commentsStream,
+                                builder: (context,snapshot){
+                                  if(snapshot.connectionState == ConnectionState.waiting){
+                                    return Center(child: BaseComponent().loadingCircle(),);
+                                  }
+                                  final comments = snapshot.data ?? [];
+                                  if(comments.isEmpty){
+                                    return Center(child: Text('No comments available',style: ConstFonts().copyWith(fontSize: 18),));
+                                  }
+                                  return Column(
+                                    children: [
+                                      for (int index = 0; index < comments.length; index++)
+                                        ListTile(
+                                          leading: const CircleAvatar(
+                                            backgroundImage: AssetImage('assets/images/user.png'),
+                                            radius: 20,
+                                          ),
+                                          title: Text("${comments[index].userName} - ${timeago.format(comments[index].createdAt)}",
+                                            style: ConstFonts().copyWith(
+                                                fontSize:13,
+                                                color:ConstColor().tertiary
+                                            ),),
+                                          subtitle: Text(comments[index].content,style: ConstFonts().bodyStyle,),
+                                          trailing: Text('${comments[index].rate.toString()} ⭐️',style: ConstFonts().copyWith(fontSize: 16),),
+                                        ),
+                                    ],
+                                  );
+                                }
                             ),
                           ]
                       ),
@@ -207,7 +246,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                           height: 40,
                           width: 150,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF329932),
+                            color: ConstColor().primary,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
@@ -219,8 +258,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children:  [
-                              const Icon(Icons.ondemand_video,color: Colors.white,),
-                              Text('Watch Video',style: ConstFonts().copyWith(color: Colors.white),),
+                              Icon(Icons.ondemand_video,color: ConstColor().onPrimary,),
+                              Text('Watch Video',style: ConstFonts().copyWith(color: ConstColor().onPrimary),),
                             ],
                           ),
                         ),
