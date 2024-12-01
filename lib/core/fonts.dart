@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class ConstFonts{
   final TextStyle headingStyle = const TextStyle(
     fontSize: 32,
@@ -11,6 +12,7 @@ class ConstFonts{
   final TextStyle bodyStyle = const TextStyle(
     fontSize: 16,
   );
+
   TextStyle copyWith({double? fontSize, FontWeight? fontWeight,Color? color}){
     return TextStyle(
       fontSize: fontSize ?? bodyStyle.fontSize,
