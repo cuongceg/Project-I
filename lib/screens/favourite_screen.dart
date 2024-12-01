@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:recipe/model/meal.dart';
-import 'package:recipe/screen/recipe_screen.dart';
+import 'package:recipe/screens/recipe_screen.dart';
+import '../providers/meal_provider.dart';
 
 class FavouriteScreen extends StatelessWidget {
   const FavouriteScreen({super.key});

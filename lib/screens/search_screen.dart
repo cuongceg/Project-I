@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:recipe/controller/api_service.dart';
-import 'package:recipe/screen/recipe_screen.dart';
+import 'package:recipe/services/api_service.dart';
+import 'package:recipe/screens/recipe_screen.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
 import '../model/meal.dart';
+import 'package:recipe/providers/meal_provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});

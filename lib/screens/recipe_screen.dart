@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recipe/const_value.dart';
-import '../controller/api_service.dart';
+import '../services/api_service.dart';
 import '../model/meal.dart';
+import 'package:recipe/providers/meal_provider.dart';
 
 class RecipeScreen extends StatefulWidget {
   final Meal meal;

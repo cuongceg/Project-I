@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
-import 'package:recipe/screen/favourite_screen.dart';
-import 'package:recipe/screen/search_screen.dart';
+import 'package:recipe/screens/favourite_screen.dart';
+import 'package:recipe/screens/search_screen.dart';
 
 
 
@@ -24,8 +24,8 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> _buildScreens() => const [
     Center(child:Text("Trang")),
     SearchScreen(),
-    Center(child:Text("Trang")),
     FavouriteScreen(),
+    Center(child:Text("Trang")),
     Center(child:Text("Trang")),
   ];
 
@@ -46,15 +46,15 @@ class _MainScreenState extends State<MainScreen> {
       inactiveColorPrimary: Colors.grey,
     ),
     PersistentBottomNavBarItem(
-      icon: const Icon(Icons.add),
-      title: "Add",
+      icon: const Icon(Icons.favorite_outline),
+      title: "Favourite",
       activeColorPrimary: activeColor,
       inactiveColorPrimary: Colors.grey,
       activeColorSecondary: Colors.white
     ),
     PersistentBottomNavBarItem(
-      icon: const Icon(Icons.favorite_outline),
-      title: "Messages",
+      icon: const Icon(Icons.notifications_none_outlined),
+      title: "Notifications",
       activeColorPrimary: activeColor,
       inactiveColorPrimary: Colors.grey,
       activeColorSecondary:Colors.white
