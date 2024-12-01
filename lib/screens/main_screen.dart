@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:recipe/screens/favourite_screen.dart';
+import 'package:recipe/screens/home_screen.dart';
 import 'package:recipe/screens/search_screen.dart';
 
 
@@ -22,7 +23,7 @@ class _MainScreenState extends State<MainScreen> {
   final activeColor = const Color(0xFF329932);
 
   List<Widget> _buildScreens() => const [
-    Center(child:Text("Trang")),
+    HomeScreen(),
     SearchScreen(),
     FavouriteScreen(),
     Center(child:Text("Trang")),
