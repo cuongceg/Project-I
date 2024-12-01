@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:recipe/screens/widgets/base_component.dart';
 import 'package:recipe/services/api_service.dart';
 import 'package:recipe/screens/recipe_screen.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
@@ -140,7 +141,7 @@ class SearchScreenState extends State<SearchScreen> {
               future: _mealsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: BaseComponent().loadingCircle());
                 } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(child: Text('No meals found.'));
                 } else {
