@@ -6,6 +6,11 @@
     <string>We need access to speech recognition to enable search feature by voice in the app.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>We need access to microphone to enable search feature by voice in the app.</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>http</string>
+        <string>https</string>
+    </array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
