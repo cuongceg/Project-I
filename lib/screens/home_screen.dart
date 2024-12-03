@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recipe/core/colors.dart';
 import 'package:recipe/core/fonts.dart';
+import 'package:recipe/core/string.dart';
 import 'package:recipe/model/food_news.dart';
 import 'package:recipe/screens/recipe_screen.dart';
 import 'package:recipe/screens/search_screen.dart';
@@ -77,12 +78,17 @@ class _HomeScreenState extends State<HomeScreen> {
           _headingLine('Recipes of the week'),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: Image.asset('assets/images/steak.jpg',
-                width: width-30,
-                height: 200,
-                fit: BoxFit.fitWidth,),
+            child: GestureDetector(
+              onTap: (){
+                apiService.openYoutubeVideo(ConstString.recipesOfTheWeek);
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: Image.asset('assets/images/steak.jpg',
+                  width: width-30,
+                  height: 200,
+                  fit: BoxFit.fitWidth,),
+              ),
             ),
           ),
           Padding(
@@ -110,19 +116,18 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (context,snapshot){
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: BaseComponent().loadingCircle());
-                } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.articles.isEmpty) {
+                } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.results.isEmpty) {
                   return const Center(child: Text('No news found.'));
                 } else {
-                  final List<Article> articles = snapshot.data!.articles;
+                  final List<NewsArticle> articles = snapshot.data!.results;
                   return Column(
                     children: [
-                      for(int i = 0; i < 3; i++)
                         _newsColumn(
-                          articles[i].urlToImage,
-                          articles[i].title,
-                          articles[i].description,
+                          articles[0].imageUrl,
+                          articles[0].title,
+                          articles[0].description,
                           width -30,
-                          articles[i].url
+                          articles[0].link
                         ),
                     ],
                   );
@@ -193,12 +198,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _newsColumn(String? urlImage,String? title,String? description,double width,String url){
+  Widget _newsColumn(String? urlImage,String? title,String? description,double width,String? url){
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: GestureDetector(
         onTap: (){
-          apiService.openYoutubeVideo(url);
+          apiService.openYoutubeVideo(url ??"www.google.com");
         },
         child: SizedBox(
           width: width,
