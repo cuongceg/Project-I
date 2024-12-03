@@ -1,20 +1,20 @@
 class FoodNews {
   final String status;
   final int totalResults;
-  final List<Article> articles;
+  final List<NewsArticle> results;
 
   FoodNews({
     required this.status,
     required this.totalResults,
-    required this.articles,
+    required this.results,
   });
 
   factory FoodNews.fromJson(Map<String, dynamic> json) {
     return FoodNews(
-      status: json['status'],
-      totalResults: json['totalResults'],
-      articles: (json['articles'] as List)
-          .map((articleJson) => Article.fromJson(articleJson))
+      status: json['status'] as String,
+      totalResults: json['totalResults'] as int,
+      results: (json['results'] as List<dynamic>)
+          .map((e) => NewsArticle.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
@@ -23,79 +23,123 @@ class FoodNews {
     return {
       'status': status,
       'totalResults': totalResults,
-      'articles': articles.map((article) => article.toJson()).toList(),
+      'results': results.map((e) => e.toJson()).toList(),
     };
   }
 }
 
-class Article {
-  final Source source;
-  final String? author;
+class NewsArticle {
+  final String? articleId;
   final String? title;
+  final String? link;
+  final List<String?> keywords;
+  final List<String?> creator;
+  final String? videoUrl;
   final String? description;
-  final String url;
-  final String? urlToImage;
-  final String? publishedAt;
   final String? content;
+  final String? pubDate;
+  final String? pubDateTZ;
+  final String? imageUrl;
+  final String? sourceId;
+  final int sourcePriority;
+  final String? sourceName;
+  final String? sourceUrl;
+  final String? sourceIcon;
+  final String? language;
+  final List<String?> country;
+  final List<String?> category;
+  final String? aiTag;
+  final String? sentiment;
+  final String? sentimentStats;
+  final String? aiRegion;
+  final String? aiOrg;
+  final bool duplicate;
 
-  Article({
-    required this.source,
-    this.author,
+  NewsArticle({
+    required this.articleId,
     required this.title,
+    required this.link,
+    required this.keywords,
+    required this.creator,
+    this.videoUrl,
     required this.description,
-    required this.url,
-    this.urlToImage,
-    required this.publishedAt,
     required this.content,
+    required this.pubDate,
+    required this.pubDateTZ,
+    required this.imageUrl,
+    required this.sourceId,
+    required this.sourcePriority,
+    required this.sourceName,
+    required this.sourceUrl,
+    this.sourceIcon,
+    required this.language,
+    required this.country,
+    required this.category,
+    required this.aiTag,
+    required this.sentiment,
+    required this.sentimentStats,
+    required this.aiRegion,
+    required this.aiOrg,
+    required this.duplicate,
   });
 
-  factory Article.fromJson(Map<String, dynamic> json) {
-    return Article(
-      source: Source.fromJson(json['source']),
-      author: json['author'],
-      title: json['title'],
-      description: json['description'],
-      url: json['url'],
-      urlToImage: json['urlToImage'],
-      publishedAt: json['publishedAt'],
-      content: json['content'],
+  factory NewsArticle.fromJson(Map<String, dynamic> json) {
+    return NewsArticle(
+      articleId: json['article_id'] as String?,
+      title: json['title'] as String?,
+      link: json['link'] as String?,
+      keywords: List<String>.from(json['keywords'] ?? []),
+      creator: List<String>.from(json['creator'] ?? []),
+      videoUrl: json['video_url'] as String?,
+      description: json['description'] as String?,
+      content: json['content'] as String?,
+      pubDate: json['pubDate'] as String?,
+      pubDateTZ: json['pubDateTZ'] as String?,
+      imageUrl: json['image_url'] as String?,
+      sourceId: json['source_id'] as String?,
+      sourcePriority: json['source_priority'] as int,
+      sourceName: json['source_name'] as String?,
+      sourceUrl: json['source_url'] as String?,
+      sourceIcon: json['source_icon'] as String?,
+      language: json['language'] as String?,
+      country: List<String>.from(json['country'] ?? []),
+      category: List<String>.from(json['category'] ?? []),
+      aiTag: json['ai_tag'] as String?,
+      sentiment: json['sentiment'] as String?,
+      sentimentStats: json['sentiment_stats'] as String?,
+      aiRegion: json['ai_region'] as String?,
+      aiOrg: json['ai_org'] as String,
+      duplicate: json['duplicate'] as bool,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'source': source.toJson(),
-      'author': author,
+      'article_id': articleId,
       'title': title,
+      'link': link,
+      'keywords': keywords,
+      'creator': creator,
+      'video_url': videoUrl,
       'description': description,
-      'url': url,
-      'urlToImage': urlToImage,
-      'publishedAt': publishedAt,
       'content': content,
-    };
-  }
-}
-
-class Source {
-  final String? id;
-  final String name;
-
-  Source({
-    this.id,
-    required this.name,
-  });
-
-  factory Source.fromJson(Map<String, dynamic> json) {
-    return Source(
-      id: json['id'],
-      name: json['name'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
+      'pubDate': pubDate,
+      'pubDateTZ': pubDateTZ,
+      'image_url': imageUrl,
+      'source_id': sourceId,
+      'source_priority': sourcePriority,
+      'source_name': sourceName,
+      'source_url': sourceUrl,
+      'source_icon': sourceIcon,
+      'language': language,
+      'country': country,
+      'category': category,
+      'ai_tag': aiTag,
+      'sentiment': sentiment,
+      'sentiment_stats': sentimentStats,
+      'ai_region': aiRegion,
+      'ai_org': aiOrg,
+      'duplicate': duplicate,
     };
   }
 }
