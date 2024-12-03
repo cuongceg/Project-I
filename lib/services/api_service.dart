@@ -30,7 +30,7 @@ class ApiService{
   }
   
   Future<FoodNews> fetchFoodNews() async {
-    final url = Uri.parse("https://newsapi.org/v2/everything?q=food recipe&from=2024-11-02&sortBy=publishedAt&apiKey=${ConstString.newsAPI}");
+    final url = Uri.parse("https://newsdata.io/api/1/latest?apikey=${ConstString.newsAPI}&q=recipe tips");
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
