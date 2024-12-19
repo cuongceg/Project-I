@@ -6,6 +6,7 @@ import 'package:recipe/screens/recipe_screen.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
 import '../model/meal.dart';
 import 'package:recipe/providers/meal_provider.dart';
+import 'image_search.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -18,6 +19,7 @@ class SearchScreenState extends State<SearchScreen> {
   ApiService apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
   late Future<List<Meal>> _mealsFuture;
+
 
   @override
   void initState() {
@@ -61,7 +63,7 @@ class SearchScreenState extends State<SearchScreen> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 suffixIcon: SizedBox(
-                  width: 100,
+                  width: 150,
                   child: Row(
                     children: [
                       IconButton(
@@ -128,7 +130,12 @@ class SearchScreenState extends State<SearchScreen> {
                           },
                         icon: const Icon(Icons.mic),
                       ),
-
+                      IconButton(
+                          onPressed: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>const ImageSearch()));
+                          },
+                          icon: const Icon(Icons.camera_alt_outlined)
+                      )
                     ],
                   ),
                 )
