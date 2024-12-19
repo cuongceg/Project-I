@@ -27,7 +27,6 @@ class _MainScreenState extends State<MainScreen> {
     SearchScreen(),
     FavouriteScreen(),
     Center(child:Text("Trang")),
-    Center(child:Text("Trang")),
   ];
 
   List<PersistentBottomNavBarItem> _navBarsItems() => [
@@ -52,13 +51,6 @@ class _MainScreenState extends State<MainScreen> {
       activeColorPrimary: activeColor,
       inactiveColorPrimary: Colors.grey,
       activeColorSecondary: Colors.white
-    ),
-    PersistentBottomNavBarItem(
-      icon: const Icon(Icons.notifications_none_outlined),
-      title: "Notifications",
-      activeColorPrimary: activeColor,
-      inactiveColorPrimary: Colors.grey,
-      activeColorSecondary:Colors.white
     ),
     PersistentBottomNavBarItem(
       icon: const Icon(Icons.person_outline_rounded),
