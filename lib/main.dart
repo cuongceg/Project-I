@@ -1,10 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:recipe/core/string.dart';
 import 'package:recipe/providers/comments_provider.dart';
 import 'package:recipe/screens/main_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'firebase_options.dart';
 import 'providers/meal_provider.dart';
 
@@ -12,6 +14,10 @@ void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await Supabase.initialize(
+    url: ConstString.superbaseURL, // Replace with your Supabase URL
+    anonKey: ConstString.superbaseKey, // Replace with your Supabase API Key
   );
   runApp(const MyApp());
 }
