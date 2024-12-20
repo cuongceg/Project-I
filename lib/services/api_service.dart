@@ -8,14 +8,18 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService{
-  Future<List<Meal>> fetchMeals(String query) async {
+  Future<List<Meal>?> fetchMeals(String query) async {
     final url = Uri.parse('https://www.themealdb.com/api/json/v1/1/search.php?s=$query');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      List meals = jsonData['meals'];
-      return meals.map((meal) => Meal.fromJson(meal)).toList();
+      List? meals = jsonData['meals'];
+      if(meals != null){
+        return meals.map<Meal>((json) => Meal.fromJson(json)).toList();
+      }else{
+        return null;
+      }
     } else {
       throw Exception('Failed to load meals');
     }
