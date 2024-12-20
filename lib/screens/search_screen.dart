@@ -18,31 +18,33 @@ class SearchScreen extends StatefulWidget {
 class SearchScreenState extends State<SearchScreen> {
   ApiService apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
-  late Future<List<Meal>> _mealsFuture;
 
-
-  @override
-  void initState() {
-    super.initState();
-    _mealsFuture = apiService.fetchMeals(''); // Initial load with no query
+  void _searchMeals()async{
+    final mealProvider = Provider.of<MealProvider>(context, listen: false);
+    mealProvider.setLoading(true);
+    List<Meal>? meals = await apiService.fetchMeals(_searchController.text);
+    if(meals != null){
+      mealProvider.setMeals(meals);
+    }else{
+      mealProvider.setMeals([]);
+    }
   }
 
-  void _searchMeals() {
-    setState(() {
-      _mealsFuture = apiService.fetchMeals(_searchController.text);
-    });
-  }
-
-  void _searchMealsByVoice(String query) {
-    setState(() {
-      _mealsFuture = apiService.fetchMeals(query);
-    });
+  void _searchMealsByVoice(String query)async{
+    final mealProvider = Provider.of<MealProvider>(context, listen: false);
+    mealProvider.setLoading(true);
+    List<Meal>? meals = await apiService.fetchMeals(query);
+    if(meals != null){
+      mealProvider.setMeals(meals);
+    }else{
+      mealProvider.setMeals([]);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     var speechProvider = Provider.of<SpeechToTextProvider>(context);
-    final mealProvider = Provider.of<MealProvider>(context);
+    Provider.of<MealProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -118,6 +120,7 @@ class SearchScreenState extends State<SearchScreen> {
                                               if(speechProvider.lastResult?.recognizedWords != null){
                                                 _searchMealsByVoice(speechProvider.lastResult!.recognizedWords);
                                                 Navigator.pop(context);
+                                                _searchController.text = speechProvider.lastResult!.recognizedWords;
                                               }
                                             },
                                             icon: const  Icon(Icons.search_rounded))
@@ -132,6 +135,8 @@ class SearchScreenState extends State<SearchScreen> {
                       ),
                       IconButton(
                           onPressed: (){
+                            final mealProvider = Provider.of<MealProvider>(context, listen: false);
+                            mealProvider.setMeals([]);
                             Navigator.push(context, MaterialPageRoute(builder: (context)=>const ImageSearch()));
                           },
                           icon: const Icon(Icons.camera_alt_outlined)
@@ -140,61 +145,62 @@ class SearchScreenState extends State<SearchScreen> {
                   ),
                 )
               ),
-              onSubmitted: (_) => _searchMeals(),
+              onSubmitted: (_) {
+                if(_searchController.text.isNotEmpty){
+                  _searchMeals();
+                }
+              },
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<Meal>>(
-              future: _mealsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            child: Consumer<MealProvider>(
+              builder: (context, mealProvider, child) {
+                if(mealProvider.isLoading){
                   return Center(child: BaseComponent().loadingCircle());
-                } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No meals found.'));
-                } else {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    mealProvider.setMeals(snapshot.data!);
-                  });
-                  return ListView.builder(
-                    itemCount: mealProvider.meals.length,
-                    itemBuilder: (context, index) {
-                      final meal = mealProvider.meals[index];
-                      return ListTile(
-                        leading: Image.network(meal.strMealThumb ?? ''),
-                        title: Text(meal.strMeal),
-                        subtitle: Text(meal.strCategory ?? ''),
+                } else if (mealProvider.meals.isEmpty) {
+                  return Center(child: Text(_searchController.text.isNotEmpty ? 'No meals found.' : 'Search for a meal.'));
+                }
+                return ListView.builder(
+                  itemCount: mealProvider.meals.length,
+                  itemBuilder: (context, index) {
+                    final meal = mealProvider.meals[index];
+                    bool isFavourite = mealProvider.isFavourite(meal.idMeal);
+                    return ListTile(
+                      leading: Image.network(meal.strMealThumb ?? ''),
+                      title: Text(meal.strMeal),
+                      subtitle: Text(meal.strCategory ?? ''),
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeScreen(meal: meal)));
+                      },
+                      trailing: GestureDetector(
                         onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>RecipeScreen(meal: meal)));},
-                        trailing: GestureDetector(
-                          onTap: () {
-                            mealProvider.toggleFavourite(meal.idMeal);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(meal.isFavourite ? 'Add to favourite recipes' : 'Remove from favourite recipes'),
-                                duration: const Duration(milliseconds: 400),
-                              ),
-                            );
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            height: 40,
-                            width: 40,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
+                          mealProvider.toggleFavourite(meal.idMeal);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(!isFavourite ? 'Added to favourite recipes' : 'Removed from favourite recipes'),
+                              duration: const Duration(milliseconds: 400),
                             ),
-                            child: Center(
-                              child: Icon(
-                                meal.isFavourite ? Icons.favorite : Icons.favorite_outline,
-                                color: meal.isFavourite ? Colors.redAccent : Colors.black,
-                              ),
+                          );
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          height: 40,
+                          width: 40,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: Center(
+                            child: Icon(
+                              isFavourite ? Icons.favorite : Icons.favorite_outline,
+                              color: isFavourite ? Colors.redAccent : Colors.black,
                             ),
                           ),
                         ),
-                      );
-                    },
-                  );
-                }
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ),
