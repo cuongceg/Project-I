@@ -47,5 +47,16 @@ class Meal {
       measures: measures,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (runtimeType != other.runtimeType) return false;
+    final Meal otherMeal = other as Meal;
+    return idMeal == otherMeal.idMeal;
+  }
+
+  @override
+  int get hashCode => idMeal.hashCode;
 }
 
