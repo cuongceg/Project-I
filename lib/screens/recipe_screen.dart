@@ -87,7 +87,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
           ),
           Consumer<MealProvider>(
               builder: (context,mealProvider,child){
-                bool isFavourite = widget.meal.isFavourite;
+                bool isFavourite = mealProvider.isFavourite(widget.meal.idMeal);
                 return Positioned(
                   right: 15,
                   top: 50,

@@ -16,7 +16,7 @@ class FavouriteScreen extends StatelessWidget {
       ),
       body: Consumer<MealProvider>(
         builder: (context, mealProvider, child) {
-          final favouriteMeals = mealProvider.meals.where((meal) => meal.isFavourite).toList();
+          final favouriteMeals = mealProvider.searchedMeals.where((meal) => meal.isFavourite).toList();
           if(favouriteMeals.isEmpty) {
             return const Center(child: Text('No favourite meals yet!'));
           }else{
