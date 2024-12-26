@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:recipe/core/colors.dart';
 import 'package:recipe/screens/recipe_screen.dart';
 import '../providers/meal_provider.dart';
 
@@ -8,11 +9,13 @@ class FavouriteScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = ConstColor().background;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text('Favourite Recipes'),
-        backgroundColor: Colors.white,
+        centerTitle: true,
+        backgroundColor: backgroundColor,
       ),
       body: Consumer<MealProvider>(
         builder: (context, mealProvider, child) {
@@ -44,9 +47,9 @@ class FavouriteScreen extends StatelessWidget {
                       duration: const Duration(milliseconds: 300),
                       height: 40,
                       width: 40,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: backgroundColor,
                       ),
                       child: Center(
                         child: Icon(
