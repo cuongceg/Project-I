@@ -28,6 +28,7 @@ class _ImageSearchState extends State<ImageSearch> {
   String? _imageUrl;
   bool isDetectedSuccessfully = false;
   late Future<Ingredient?> _ingredientFuture;
+  final backgroundColor = ConstColor().background;
 
   @override
   void initState() {
@@ -50,9 +51,9 @@ class _ImageSearchState extends State<ImageSearch> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black,),
           onPressed: () {
@@ -148,7 +149,11 @@ class _ImageSearchState extends State<ImageSearch> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return BaseComponent().loadingCircle();
                   } else if (!snapshot.hasData || snapshot.data!.predictions.isEmpty) {
-                    return const SizedBox();
+                    if(_imageUrl != null){
+                      return const Center(child: Text('No ingredients detected.'));
+                    }else{
+                      return const SizedBox();
+                    }
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
@@ -199,9 +204,9 @@ class _ImageSearchState extends State<ImageSearch> {
                             duration: const Duration(milliseconds: 300),
                             height: 40,
                             width: 40,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white,
+                              color: backgroundColor,
                             ),
                             child: Center(
                               child: Icon(
