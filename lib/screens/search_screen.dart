@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:recipe/core/colors.dart';
 import 'package:recipe/screens/widgets/base_component.dart';
 import 'package:recipe/services/api_service.dart';
 import 'package:recipe/screens/recipe_screen.dart';
 import 'package:speech_to_text/speech_to_text_provider.dart';
+import '../core/decoration.dart';
 import '../model/meal.dart';
 import 'package:recipe/providers/meal_provider.dart';
 import 'image_search.dart';
@@ -16,6 +18,7 @@ class SearchScreen extends StatefulWidget {
 }
 
 class SearchScreenState extends State<SearchScreen> {
+  final backgroundColor = ConstColor().background;
   ApiService apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
 
@@ -46,9 +49,10 @@ class SearchScreenState extends State<SearchScreen> {
     var speechProvider = Provider.of<SpeechToTextProvider>(context);
     Provider.of<MealProvider>(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
+        centerTitle: true,
         title: const Text('Search Meals'),
       ),
       body: Column(
@@ -61,9 +65,9 @@ class SearchScreenState extends State<SearchScreen> {
               decoration: InputDecoration(
                 hintText: 'Search for a meal...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
+                border: ConstDecoration().outlinedBorder(),
+                enabledBorder: ConstDecoration().outlinedBorder(),
+                focusedBorder: ConstDecoration().outlinedBorder(),
                 suffixIcon: SizedBox(
                   width: 150,
                   child: Row(
@@ -186,9 +190,9 @@ class SearchScreenState extends State<SearchScreen> {
                           duration: const Duration(milliseconds: 300),
                           height: 40,
                           width: 40,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white,
+                            color: backgroundColor,
                           ),
                           child: Center(
                             child: Icon(
