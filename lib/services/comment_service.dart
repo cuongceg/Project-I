@@ -21,4 +21,24 @@ class CommentServices{
       }
     });
   }
+
+  Future<void> createComment(String mealId, Comment comment) async {
+    final commentMap = comment.toMap();
+    final mealDoc = _firestore.collection('meal').doc(mealId);
+    final isExist = await mealDoc.get();
+
+    try {
+      if (!isExist.exists) {
+        await mealDoc.set({
+          'comment': [commentMap]
+        });
+      } else {
+        await mealDoc.update({
+          'comment': FieldValue.arrayUnion([commentMap])
+        });
+      }
+    } catch (e) {
+      debugPrint('Error adding comment: $e');
+    }
+  }
 }

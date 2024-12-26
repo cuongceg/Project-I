@@ -18,4 +18,14 @@ class Comment{
       createdAt: (map['createdAt'] as Timestamp).toDate()
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'rate': rate,
+      'content': content,
+      'userName': userName,
+      'createdAt': Timestamp.fromDate(createdAt),
+    };
+  }
 }
