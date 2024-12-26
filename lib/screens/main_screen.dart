@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:recipe/core/colors.dart';
 import 'package:recipe/screens/favourite_screen.dart';
 import 'package:recipe/screens/home_screen.dart';
+import 'package:recipe/screens/profile_screen.dart';
 import 'package:recipe/screens/search_screen.dart';
-
-
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -20,13 +20,13 @@ class _MainScreenState extends State<MainScreen> {
     ScrollController(),
   ];
   final NavBarStyle _navBarStyle = NavBarStyle.style10;
-  final activeColor = const Color(0xFF329932);
+  final activeColor = ConstColor().primary;
 
   List<Widget> _buildScreens() => const [
     HomeScreen(),
     SearchScreen(),
     FavouriteScreen(),
-    Center(child:Text("Trang")),
+    ProfileScreen()
   ];
 
   List<PersistentBottomNavBarItem> _navBarsItems() => [
@@ -79,6 +79,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ConstColor().background,
       body: PersistentTabView(
         context,
         controller: _controller,
