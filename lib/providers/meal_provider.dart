@@ -31,6 +31,12 @@ class MealProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void clearMeals(){
+    meals.clear();
+    searchedMeals.clear();
+    notifyListeners();
+  }
+
   void toggleFavourite(String idMeal) {
     final mealIndex = searchedMeals.indexWhere((meal) => meal.idMeal == idMeal);
     if (mealIndex != -1) {
