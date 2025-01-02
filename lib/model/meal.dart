@@ -20,6 +20,7 @@ class Meal {
     this.strMealThumb,
     required this.ingredients,
     required this.measures,
+    this.isFavourite = false,
   });
 
   factory Meal.fromJson(Map<String, dynamic> json) {
@@ -45,6 +46,37 @@ class Meal {
       strYoutube: json['strYoutube'],
       ingredients: ingredients,
       measures: measures,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'idMeal': idMeal,
+      'strMeal': strMeal,
+      'strCategory': strCategory,
+      'strArea': strArea,
+      'strInstructions': strInstructions,
+      'strYoutube': strYoutube,
+      'strMealThumb': strMealThumb,
+      'isFavourite': isFavourite,
+      'ingredients': ingredients,
+      'measures': measures,
+    };
+  }
+
+  // Create Meal from Firestore document
+  factory Meal.fromMap(Map<String, dynamic> map) {
+    return Meal(
+      idMeal: map['idMeal'],
+      strMeal: map['strMeal'],
+      strCategory: map['strCategory'],
+      strArea: map['strArea'],
+      strInstructions: map['strInstructions'],
+      strYoutube: map['strYoutube'],
+      strMealThumb: map['strMealThumb'],
+      isFavourite: map['isFavourite'] ?? false,
+      ingredients: List<String>.from(map['ingredients'] ?? []),
+      measures: List<String>.from(map['measures'] ?? []),
     );
   }
 
