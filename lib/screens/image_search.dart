@@ -27,6 +27,7 @@ class _ImageSearchState extends State<ImageSearch> {
   final ApiService _apiService = ApiService();
   String? _imageUrl;
   bool isDetectedSuccessfully = false;
+  bool isUploading = false;
   late Future<Ingredient?> _ingredientFuture;
   final backgroundColor = ConstColor().background;
 
@@ -127,6 +128,10 @@ class _ImageSearchState extends State<ImageSearch> {
                     if (_imageFile != null) {
                       _uploadImageToSupabase(_imageFile!);
                     }
+                    setState(() {
+                      isUploading = true;
+                      isDetectedSuccessfully = false;
+                    });
                   },
                   child: Container(
                     height: 40,
@@ -135,8 +140,8 @@ class _ImageSearchState extends State<ImageSearch> {
                       color: ConstColor().primary,
                       borderRadius: BorderRadius.circular(30),
                     ),
-                    child: const Center(
-                      child: Text("Check ", style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w700),),
+                    child: Center(
+                      child: Text(isUploading?"Uploading...":"Check ", style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w700),),
                     ),
                   ),
                 )
@@ -164,6 +169,9 @@ class _ImageSearchState extends State<ImageSearch> {
                         trailing: const Icon(Icons.search_rounded),
                         onTap :(){
                           _searchMeal(SearchUtilities().extractString(ingredients.first.detectedClass));
+                          setState(() {
+                            isDetectedSuccessfully = true;
+                          });
                         }
                     );
                   }
@@ -175,50 +183,56 @@ class _ImageSearchState extends State<ImageSearch> {
                 builder: (context, mealProvider, child) {
                   if(mealProvider.isLoading){
                     return Center(child: BaseComponent().loadingCircle());
-                  } else if (mealProvider.meals.isEmpty) {
+                  } else if (mealProvider.meals.isEmpty && isDetectedSuccessfully) {
+                    return const Center(
+                      child: Text('No meals found'),
+                    );
+                  }else if(mealProvider.meals.isEmpty){
                     return const SizedBox();
-                  }
-                  return ListView.builder(
-                    itemCount: mealProvider.meals.length,
-                    itemBuilder: (context, index) {
-                      final meal = mealProvider.meals[index];
-                      bool isFavourite = mealProvider.isFavourite(meal.idMeal);
-                      return ListTile(
-                        leading: Image.network(meal.strMealThumb ?? ''),
-                        title: Text(meal.strMeal),
-                        subtitle: Text(meal.strCategory ?? ''),
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeScreen(meal: meal)));
-                        },
-                        trailing: GestureDetector(
+                  }else{
+                    return ListView.builder(
+                      itemCount: mealProvider.meals.length,
+                      itemBuilder: (context, index) {
+                        final meal = mealProvider.meals[index];
+                        bool isFavourite = mealProvider.isFavourite(meal.idMeal);
+                        return ListTile(
+                          leading: Image.network(meal.strMealThumb ?? ''),
+                          title: Text(meal.strMeal),
+                          subtitle: Text(meal.strCategory ?? ''),
                           onTap: () {
-                            mealProvider.toggleFavourite(meal.idMeal);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(!isFavourite ? 'Added to favourite recipes' : 'Removed from favourite recipes'),
-                                duration: const Duration(milliseconds: 400),
-                              ),
-                            );
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeScreen(meal: meal)));
                           },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            height: 40,
-                            width: 40,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: backgroundColor,
-                            ),
-                            child: Center(
-                              child: Icon(
-                                isFavourite ? Icons.favorite : Icons.favorite_outline,
-                                color: isFavourite ? Colors.redAccent : Colors.black,
+                          trailing: GestureDetector(
+                            onTap: () {
+                              mealProvider.addSearchedMeal(meal);
+                              mealProvider.toggleFavourite(meal.idMeal);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(!isFavourite ? 'Added to favourite recipes' : 'Removed from favourite recipes'),
+                                  duration: const Duration(milliseconds: 400),
+                                ),
+                              );
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: backgroundColor,
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  isFavourite ? Icons.favorite : Icons.favorite_outline,
+                                  color: isFavourite ? Colors.redAccent : Colors.black,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  );
+                        );
+                      },
+                    );
+                  }
                 },
               ),
             )
@@ -250,10 +264,9 @@ class _ImageSearchState extends State<ImageSearch> {
         _imageUrl = publicUrl;
       });
 
-      debugPrint('Image URL: $publicUrl');
-
       if (_imageUrl != null) {
         setState(() {
+          isUploading = false;
           _ingredientFuture = _apiService.detectIngredients(_imageUrl!);
         });
       }
