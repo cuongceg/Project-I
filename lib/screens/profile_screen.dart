@@ -7,7 +7,6 @@ import 'package:recipe/screens/widgets/base_component.dart';
 import 'package:recipe/services/authentication_service.dart';
 
 import '../model/user.dart';
-import '../providers/meal_provider.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {

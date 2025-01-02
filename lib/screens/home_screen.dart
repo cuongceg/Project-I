@@ -41,7 +41,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          _headingLine('Recommendations'),
           // FutureBuilder<List<Meal>>(
           //   future: _mealsFuture,
           //   builder: (context, snapshot) {
