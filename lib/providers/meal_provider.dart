@@ -1,10 +1,14 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:recipe/model/meal.dart';
+import 'package:recipe/services/meal_database.dart';
 class MealProvider with ChangeNotifier {
   List<Meal> _meals = [];
-  final List<Meal> _searchedMeals = [];
+  List<Meal> _searchedMeals = [];
   bool _isLoading = false;
+
+  final String? userId; // Add userId
+  MealProvider({this.userId});
 
   List<Meal> get searchedMeals => _searchedMeals;
   List<Meal> get meals => _meals;
@@ -12,9 +16,6 @@ class MealProvider with ChangeNotifier {
 
   void setMeals(List<Meal> meals) {
     _meals = meals;
-    if(meals.isNotEmpty&&!_searchedMeals.contains(meals.first)){
-      _searchedMeals.addAll(meals);
-    }
     _isLoading = false;
     notifyListeners();
   }
@@ -24,16 +25,10 @@ class MealProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void addSearchedMeal(List<Meal> meal) {
-    if(meals.isNotEmpty&&!_searchedMeals.contains(meals.first)){
-      _searchedMeals.addAll(meals);
+  void addSearchedMeal(Meal meal) {
+    if(!_searchedMeals.contains(meal)){
+      _searchedMeals.add(meal);
     }
-    notifyListeners();
-  }
-
-  void clearMeals(){
-    meals.clear();
-    searchedMeals.clear();
     notifyListeners();
   }
 
@@ -43,6 +38,14 @@ class MealProvider with ChangeNotifier {
       _searchedMeals[mealIndex].isFavourite = !_searchedMeals[mealIndex].isFavourite;
       notifyListeners();
     }
+    if(userId != null){
+      if(_searchedMeals[mealIndex].isFavourite) {
+        MealDatabase(userId: userId).saveFavoriteMeals(
+            _searchedMeals[mealIndex]);
+      }else{
+        MealDatabase(userId: userId).removeFavoriteMeal(idMeal);
+      }
+    }
   }
 
   bool isFavourite(String idMeal) {
@@ -51,5 +54,11 @@ class MealProvider with ChangeNotifier {
       return _searchedMeals[mealIndex].isFavourite;
     }
     return false;
+  }
+
+  Future<void> fetchMeals() async {
+    if (userId == null) return;
+    _searchedMeals = await MealDatabase(userId: userId).fetchMealsFromDatabase();
+    notifyListeners();
   }
 }

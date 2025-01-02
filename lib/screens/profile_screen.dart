@@ -15,7 +15,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mealProvider = Provider.of<MealProvider>(context,listen: false);
     final user = Provider.of<User?>(context);
     final userInformationList = Provider.of<List<UserInformation>?>(context);
     UserInformation? userInformation;
@@ -45,7 +44,6 @@ class ProfileScreen extends StatelessWidget {
             child: BaseComponent().continueButton(
                 onPressed: ()async{
                   await AuthService().signOut();
-                  mealProvider.clearMeals();
                 },
                 text: "Sign Out"
             ),
@@ -60,7 +58,6 @@ class ProfileScreen extends StatelessWidget {
            padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 20),
            child: BaseComponent().continueButton(
                onPressed: (){
-                 mealProvider.clearMeals();
                   Navigator.push(context, MaterialPageRoute(builder: (context)=>const LoginScreen()));
                },
                text: "Sign In"

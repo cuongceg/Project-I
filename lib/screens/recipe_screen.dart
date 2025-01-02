@@ -9,7 +9,6 @@ import 'package:recipe/model/user.dart';
 import 'package:recipe/providers/comments_provider.dart';
 import 'package:recipe/screens/widgets/base_component.dart';
 import 'package:recipe/services/comment_service.dart';
-import '../core/decoration.dart';
 import '../services/api_service.dart';
 import '../model/meal.dart';
 import 'package:recipe/providers/meal_provider.dart';
@@ -56,7 +55,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mealProvider = Provider.of<MealProvider>(context, listen: false);
     final commentsProvider = Provider.of<CommentProvider>(context);
     final user = Provider.of<User?>(context);
     final userInformationList = Provider.of<List<UserInformation>?>(context);
@@ -108,6 +106,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                   top: 50,
                   child:GestureDetector(
                     onTap: (){
+                      mealProvider.addSearchedMeal(widget.meal);
                       mealProvider.toggleFavourite(widget.meal.idMeal);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -212,7 +211,10 @@ class _RecipeScreenState extends State<RecipeScreen> {
                                   }
                                   final comments = snapshot.data ?? [];
                                   if(comments.isEmpty){
-                                    return Center(child: Text('No comments available.Be the first one',style: ConstFonts().copyWith(fontSize: 18),));
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 10),
+                                      child: Center(child: Text('No comments available.Be the first one',style: ConstFonts().copyWith(fontSize: 18),)),
+                                    );
                                   }
                                   return Column(
                                     children: [
@@ -236,44 +238,75 @@ class _RecipeScreenState extends State<RecipeScreen> {
                                 }
                             ),
                             user!=null?
-                                Column(
-                                  children: [
-                                    ratingStars(),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: TextField(
-                                        controller: commentController,
-                                        decoration: InputDecoration(
-                                          border: ConstDecoration().outlinedBorder(),
-                                          focusedBorder: ConstDecoration().outlinedBorder(),
-                                          enabledBorder: ConstDecoration().outlinedBorder(),
-                                          hintText: 'Write a comment',
-                                          suffixIcon: IconButton(
-                                              onPressed:(){
-                                                if(commentController.text.isNotEmpty){
-                                                  final comment = Comment(
-                                                      id: 0,
-                                                      rate: rating,
-                                                      content: commentController.text,
-                                                      userName: user.displayName ?? userInformation!.name ?? '',
-                                                      createdAt: DateTime.now()
-                                                  );
-                                                  CommentServices().createComment(widget.meal.idMeal, comment);
-                                                  commentController.clear();
-                                                }
-                                              },
-                                              icon: Icon(Icons.send,color: ConstColor().primary,)
-                                          )
-                                        ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(16),
+                                      topRight: Radius.circular(16),
+                                    ),
+                                    border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.5), // Shadow color with opacity
+                                        blurRadius: 10, // Blur radius for the shadow
                                       ),
-                                    )
-                                  ],
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      ratingStars(),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left:10,right: 10,bottom: 10),
+                                        child: TextField(
+                                          controller: commentController,
+                                          decoration: InputDecoration(
+                                              border: const OutlineInputBorder(
+                                                borderSide: BorderSide(color: Colors.white),
+                                              ),
+                                              focusedBorder: const OutlineInputBorder(
+                                                borderSide: BorderSide(color: Colors.white),
+                                              ),
+                                              enabledBorder: const OutlineInputBorder(
+                                                borderSide: BorderSide(color: Colors.white),
+                                              ),
+                                              hintText: 'Write a comment',
+                                              suffixIcon: IconButton(
+                                                  onPressed:(){
+                                                    if(commentController.text.isNotEmpty && rating != 0){
+                                                      final comment = Comment(
+                                                          id: 0,
+                                                          rate: rating,
+                                                          content: commentController.text,
+                                                          userName: user.displayName ?? userInformation!.name ?? '',
+                                                          createdAt: DateTime.now()
+                                                      );
+                                                      CommentServices().createComment(widget.meal.idMeal, comment);
+                                                      commentController.clear();
+                                                      setState(() {
+                                                        rating = 0;
+                                                      });
+                                                    }else{
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        const SnackBar(
+                                                          content: Text('Please write a comment and rate the recipe'),
+                                                          duration: Duration(milliseconds: 900),
+                                                        ),
+                                                      );
+                                                    }
+                                                  },
+                                                  icon: Icon(Icons.send,color: ConstColor().primary,)
+                                              )
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ):
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 10),
                                   child: BaseComponent().continueButton(
                                       onPressed: (){
-                                        mealProvider.clearMeals();
                                         Navigator.push(context, MaterialPageRoute(builder: (context)=>const LoginScreen()));
                                       },
                                       text: 'Sign in to comment'
